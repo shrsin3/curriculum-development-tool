@@ -89,7 +89,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function programs()
     {
-        return $this->belongsToMany(\App\Models\Program::class, 'program_users', 'user_id', 'program_id')->withPivot('permission');
+        return $this->belongsToMany(\App\Models\Program::class, 'program_users', 'user_id', 'program_id')->withPivot('permission','role_id');
     }
 
     public function programsWithElevatedRoleAccess()
@@ -143,6 +143,15 @@ class User extends Authenticatable implements MustVerifyEmail
 
         return $this->programsWithElevatedRoleAccess()
                     ->withPivot('role_id')
+                    ->wherePivot('role_id', $directorRoleId);
+    }
+
+    public function directedProducts()
+    {
+        $directorRoleId = Role::where('role', 'program director')->first()->id;
+
+        return $this->programs()
+                    ->withPivot('permission','role_id')
                     ->wherePivot('role_id', $directorRoleId);
     }
 
