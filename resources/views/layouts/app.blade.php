@@ -104,10 +104,10 @@
                                                 System Administrator
                                             </a>
                                         @endcan
-                                        
+
                                         @can('admin-privilege')
                                             <a class="dropdown-item" href="{{ route('assignRole') }}">
-                                                Assign Role
+                                                Manage Roles
                                             </a>
                                         @endcan
 

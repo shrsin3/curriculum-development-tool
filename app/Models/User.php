@@ -146,15 +146,6 @@ class User extends Authenticatable implements MustVerifyEmail
                     ->wherePivot('role_id', $directorRoleId);
     }
 
-    public function directedProducts()
-    {
-        $directorRoleId = Role::where('role', 'program director')->first()->id;
-
-        return $this->programs()
-                    ->withPivot('permission','role_id')
-                    ->wherePivot('role_id', $directorRoleId);
-    }
-
     public function hasAnyRoles($roles)
     {
         if ($this->roles()->whereIn('role', $roles)->first()) {

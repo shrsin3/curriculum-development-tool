@@ -157,9 +157,9 @@ class ProgramController extends Controller
             }
         }
 
-        return $errorMessages;
+            return $errorMessages;
 
-    }
+        }
 
     function addAllDepartmentHeadsToProgram($program)
     {
