@@ -38,7 +38,7 @@
                                 <form action="{{ route('courses.duplicate', $course->course_id) }}" method="POST">
                                     @csrf
                                     {{method_field('POST')}}
-                                    
+
                                     <div class="modal-body">
 
                                         <div class="form-group row">
@@ -92,7 +92,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="modal-footer">
                                         <button style="width:60px" type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel</button>
                                         <button style="width:80px" type="submit" class="btn btn-success btn-sm">Duplicate</button>
@@ -104,7 +104,7 @@
                 </div>
             </div>
         @endif
-        @if (!$isEditor && !$isViewer) 
+        @if (!$isEditor && !$isViewer)
                 <div class="row">
                     <div class="col">
                         <!-- Edit button -->
@@ -334,6 +334,16 @@
 
                     </div>
                 </div>
+                @if($course->file_path)
+                    <div class="row my-2">
+                        <div class="col">
+                            <a href="{{ route('courses.getSyllabiLink', $course->course_id) }}" target="_blank">
+                                <button type="button" style="width:200px" class="btn btn-primary btn-sm float-right"
+                                >View Syllabus File</button>
+                            </a>
+                        </div>
+                    </div>
+                @endif
 
             </div>
         @endif
@@ -388,9 +398,9 @@
         var currentLength = event.target.value.length;
         var whiteSpace = event.target.value.split(/\n/).length;
         if((currentLength+(whiteSpace))>MAX_LENGTH)
-        { 
+        {
             //Goes to MAX_LENGTH-(whiteSpace)+1 because it starts at 1
-            event.target.value = event.target.value.substr(0,MAX_LENGTH-(whiteSpace)+1);	        
+            event.target.value = event.target.value.substr(0,MAX_LENGTH-(whiteSpace)+1);
         }
-    } 
+    }
 </script>

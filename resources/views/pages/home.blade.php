@@ -1437,7 +1437,7 @@
                 </button>
             </div>
             <div class="modal-body d-flex flex-column align-items-center">
-                <button type="button" class="btn btn-primary mb-2 w-75 rounded-pill" data-toggle="modal" data-target="#uploadCourseSyllabi" data-dismiss="modal">Automatically Create with Course Syllabi</button>
+                <button id="openUploadCourseSyllabiFile" type="button" class="btn btn-primary mb-2 w-75 rounded-pill" data-toggle="modal" data-target="#uploadCourseSyllabi" data-dismiss="modal">Automatically Create with Course Syllabi</button>
                 <button type="button" class="btn btn-outline-primary w-75 rounded-pill" data-toggle="modal" data-target="#createCourseModal" data-dismiss="modal">Create Manually</button>
             </div>
         </div>
@@ -1455,11 +1455,12 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form id="uploadCourseSyllabiForm" method="POST" action="" enctype="multipart/form-data">
+            <form id="uploadCourseSyllabiForm" method="POST" action="{{route('courses.storeFromSyllabi') }}" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
                     <div class="input-group">
-                        <input type="file" id="inputCourseSyllabiFiles" name="upload" class="form-control"
+                        <input type="hidden" class="form-check-input" name="user_id" value={{Auth::id()}}>
+                        <input type="file" id="inputCourseSyllabiFiles" name="uploadedSyllabi[]" class="form-control"
                                aria-label="Upload" required multiple accept=".pdf, .docx">
                     </div>
                     <ul id="uploadedCourseSyllabiList"></ul>
