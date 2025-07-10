@@ -11,10 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('courses', function (Blueprint $table) {
-            //
+        Schema::create('course_syllabi_file', function (Blueprint $table) {
+            $table->id();
             $table->text('file_name')->nullable();
             $table->text('file_path')->nullable();
+            $table->unsignedBigInteger('course_id')->nullable();
+            $table->foreign('course_id')->references('course_id')->on('courses')->onDelete('cascade');
+            $table->timestamps();
         });
     }
 
@@ -23,8 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('courses', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('course_syllabi_file');
     }
 };

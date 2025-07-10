@@ -8,11 +8,13 @@ use App\Mail\NotifyNewUserAndInstructorMail;
 use App\Models\AssessmentMethod;
 use App\Models\Campus;
 use App\Models\Course;
+use App\Models\CourseSyllabiFile;
 use App\Models\CourseUserRole;
 use App\Models\Department;
 use App\Models\Faculty;
 use App\Models\FacultyCourseCodes;
 use App\Models\Role;
+use Illuminate\Support\Facades\App;
 use Illuminate\Validation\Rules\File;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Color;
@@ -567,9 +569,11 @@ class CourseController extends Controller
         $currentUserPermission = $currentUser->effectivePermissionForCourse($course->course_id);
         // if the current user own the course, then try to delete it
         if ($currentUserPermission == 1) {
-            if($course->file_path){
-                if (Storage::exists($course->file_path)) {
-                    Storage::delete($course->file_path);
+            if(CourseSyllabiFile::where('course_id', $course->course_id)->exists()){
+                $courseFile = CourseSyllabiFile::where('course_id', $course->course_id)->first();
+                if (Storage::exists($courseFile->file_path)) {
+                    Storage::delete($courseFile->file_path);
+                    $courseFile->delete();
                 }
             }
             if ($course->delete()) {
@@ -1996,11 +2000,14 @@ public function storeCourseWithSyllabi(Request $request)
         foreach($files as $file) {
             if ($file->isValid()) {
                 $path = $file->store('courseSyllabi');
-                $course = new Course();
-                $course->file_name = $file->getClientOriginalName();
-                $course->file_path = $path;
+                $courseFile = new CourseSyllabiFile();
+                $courseFile->file_name = $file->getClientOriginalName();
+                $courseFile->file_path = $path;
+                $courseFile->save();
+
 
                 // TO DO: CHANGE AFTER API CALL
+                $course = new Course();
                 $course->course_code = '123';
                 $course->delivery_modality = 'O';
                 $course->year = 2025;
@@ -2009,6 +2016,11 @@ public function storeCourseWithSyllabi(Request $request)
                 $course->assigned = 1;
                 $course->type = 'unassigned';
                 $course->save();
+
+                $courseFile = CourseSyllabiFile::where(['file_name'=> $file->getClientOriginalName(),
+                    'file_path'=> $path])->first();
+                $courseFile->course_id = $course->course_id;
+                $courseFile->save();
 
                 $user = User::find(Auth::id());
                 $adminAddErrorMessages = $this->addAllAdminsToCourse($course, $user);
@@ -2042,20 +2054,21 @@ public function storeCourseWithSyllabi(Request $request)
                 $errorMessages->add($file->getClientOriginalName() . ' failed to upload.');
             }
         }
+    } else {
+        $errorMessages->add('No File was uploaded!');
     }
 
     return back()->with('errorMessages', $errorMessages);
 }
 
 public function getCourseSyllabiLink(Request $request, $course_id){
-        $course = Course::where('course_id', $course_id)->first();
-        if($course->file_path){
-            $path = base_path() . '/storage/app/'.$course->file_path;
+        $courseFile = CourseSyllabiFile::where('course_id', $course_id)->first();
+        if($courseFile->file_path && App::environment(['local', 'testing'])){
+            $path = base_path() . '/storage/app/'.$courseFile->file_path;
             return response()->file($path);
         } else{
             return url('/');
         }
-
 }
 
 

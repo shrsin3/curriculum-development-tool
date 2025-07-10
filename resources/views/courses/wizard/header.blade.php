@@ -334,7 +334,7 @@
 
                     </div>
                 </div>
-                @if($course->file_path)
+                @if($course->syllabusFile)
                     <div class="row my-2">
                         <div class="col">
                             <a href="{{ route('courses.getSyllabiLink', $course->course_id) }}" target="_blank">
