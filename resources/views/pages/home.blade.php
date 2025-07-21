@@ -1544,6 +1544,58 @@
                             </div>
                         </div>
 
+                        <!-- Campus -->
+                        <div class="form-group row">
+                            <label for="campus" class="col-md-3 col-form-label text-md-right">Campus</label>
+                            <div class="col-md-8">
+                                <select id="campus-course" class="custom-select" name="campus">
+                                    <option disabled selected hidden>Open list of campuses</option>
+                                    @foreach ($campuses as $campus)
+                                        <option value="{{$campus->campus}}">{{$campus->campus}}</option>
+                                    @endforeach
+                                    <option value="Other">Other</option>
+                                </select>
+                                <input id='campus-text-course' class="form-control campus_text" name="campus" type="text" placeholder="(Optional) Enter the campus name" disabled hidden></input>
+                                @error('campus')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                            </span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <!-- Faculty - dropdown -->
+                        <div class="form-group row">
+                            <label for="faculty" class="col-md-3 col-form-label text-md-right">Faculty/School</label>
+                            <div class="col-md-8">
+                                <select id="faculty-course" class="custom-select" name="faculty" disabled>
+                                    <option disabled selected hidden>Open list of faculties/schools</option>
+                                </select>
+                                <input id='faculty-text-course' class="form-control faculty_text" name="faculty" type="text" placeholder="(Optional) Enter the faculty/school" disabled hidden></input>
+                                @error('faculty')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                            </span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <!-- Department -->
+                        <div class="form-group row">
+                            <label for="department" class="col-md-3 col-form-label text-md-right">Department</label>
+                            <div class="col-md-8">
+                                <select id="department-course" class="custom-select department_select" name="department" disabled>
+                                    <option disabled selected hidden>Open list of departments</option>
+                                </select>
+                                <input id='department-text-course' class="form-control" name="department" type="text" placeholder="(Optional) Enter the department" disabled hidden></input>
+                                @error('department')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                            </span>
+                                @enderror
+                            </div>
+                        </div>
+
                             <div class="form-group row">
                                 <label for="course_title" class="col-md-3 col-form-label text-md-right"><span class="requiredField">* </span>Term and Year</label>
 
@@ -1566,19 +1618,9 @@
                             <div class="col-md-2 float-right">
                                 <select id="course_year" class="form-control @error('course_year') is-invalid @enderror"
                                     name="course_year" required autofocus>
-                                    <option value="2030">2030</option>
-                                    <option value="2029">2029</option>
-                                    <option value="2028">2028</option>
-                                    <option value="2027">2027</option>
-                                    <option value="2026">2026</option>
-                                    <option value="2025">2025</option>
-                                    <option value="2024">2024</option>
-                                    <option value="2023">2023</option>
-                                    <option value="2022">2022</option>
-                                    <option value="2021">2021</option>
-                                    <option value="2020">2020</option>
-                                    <option value="2019">2019</option>
-
+                                    @for ($year = now()->year - 5; $year <= now()->year + 5; $year++)
+                                        <option value="{{ $year }}" {{ $year == now()->year ? 'selected' : '' }}>{{ $year }}</option>
+                                    @endfor
                                     @error('course_year')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
@@ -1721,7 +1763,7 @@
             // filter faculty based on campus
             if ($('#campus').find(':selected').text() == 'Vancouver') {
                 // Hide text / show select
-                campusDefaultOption();
+                campusDefaultOption('#campus-text', '#faculty', '#faculty-text', '#department', '#department-text');
 
                 //Displays Vancouver Faculties
                 // delete drop down items
@@ -1744,7 +1786,7 @@
 
             } else if ($('#campus').find(':selected').text() == 'Okanagan') {
                 // Hide text / show select
-                campusDefaultOption();
+                campusDefaultOption('#campus-text', '#faculty', '#faculty-text', '#department', '#department-text');
 
                 // Display Okangan Faculties
                 // delete drop down items
@@ -1766,7 +1808,7 @@
                 }
 
             } else {
-                campusOtherOption();
+                campusOtherOption('#campus-text', '#faculty', '#faculty-text', '#department', '#department-text');
             }
 
         });
@@ -1779,7 +1821,7 @@
             // get departments by faculty if they belong to a faculty, else display all departments
             if (facultyId >= 0) {
                 // Hide text / show select
-                facultyDefaultOption();
+                facultyDefaultOption('#faculty-text', '#department', '#department-text');
 
                 // delete drop down items
                 $('#department').empty();
@@ -1800,7 +1842,7 @@
 
             } else {
                 // Hide text / show select
-                facultyOtherOption();
+                facultyOtherOption('#faculty-text', '#department', '#department-text');
             }
 
         });
@@ -1827,74 +1869,170 @@
 
         $('#department').change( function() {
             if ($('#department').find(':selected').val() !== 'Other') {
-                departmentDefaultOption();
+                departmentDefaultOption('#department-text');
             } else {
-                departmentOtherOption();
+                departmentOtherOption('#department-text');
+            }
+        });
+
+        $('#campus-course').change( function() {
+            // filter faculty based on campus
+            if ($('#campus-course').find(':selected').text() == 'Vancouver') {
+                // Hide text / show select
+                campusDefaultOption('#campus-text-course', '#faculty-course',
+                    '#faculty-text-course', '#department-course', '#department-text-course');
+
+                //Displays Vancouver Faculties
+                // delete drop down items
+                $('#faculty-course').empty();
+                // populate drop down
+                $('#faculty-course').append($('<option disabled selected hidden>Open list of faculties/schools</option>'));
+                vFaculties.forEach (faculty => $('#faculty-course').append($('<option name="'+faculty.faculty_id+'" />').val(faculty.faculty).text(faculty.faculty)));
+                $('#faculty-course').append($('<option name="-1" />').val('Other').text('Other'));
+
+                // enable the faculty select field
+                if ($('#faculty-course').is(':disabled')) {
+                    $('#faculty-course').prop('disabled', false);
+                }
+                // disable the department field
+                if (!($('#department-course').is(':disabled'))) {
+                    $('#department-course').empty();
+                    $('#department-course').append($('<option disabled selected hidden>Open list of departments</option>'));
+                    $('#department-course').prop('disabled', true);
+                }
+
+            } else if ($('#campus-course').find(':selected').text() == 'Okanagan') {
+                // Hide text / show select
+                campusDefaultOption();
+
+                // Display Okangan Faculties
+                // delete drop down items
+                $('#faculty-course').empty();
+                // populate drop down
+                $('#faculty-course').append($('<option disabled selected hidden>Open list of faculties/schools</option>'));
+                oFaculties.forEach (faculty => $('#faculty').append($('<option name="'+faculty.faculty_id+'" />').val(faculty.faculty).text(faculty.faculty)));
+                $('#faculty-course').append($('<option name="-1" />').val('Other').text('Other'));
+
+                // enable the faculty select field
+                if ($('#faculty-course').is(':disabled')) {
+                    $('#faculty-course').prop('disabled', false);
+                }
+                // disable the department field
+                if (!($('#department-course').is(':disabled'))) {
+                    $('#department-course').empty();
+                    $('#department-course').append($('<option disabled selected hidden>Open list of departments</option>'));
+                    $('#department-course').prop('disabled', true);
+                }
+
+            } else {
+                campusOtherOption('#campus-text-course', '#faculty-course',
+                    '#faculty-text-course', '#department-course', '#department-text-course');
+            }
+
+        });
+
+        $('#faculty-course').change( function() {
+            var facultyId = parseInt($('#faculty-course').find(':selected').attr('name'));
+
+            // get departments by faculty if they belong to a faculty, else display all departments
+            if (facultyId >= 0) {
+                // Hide text / show select
+                facultyDefaultOption('#faculty-text-course', '#department-course', '#department-text-course');
+
+                // delete drop down items
+                $('#department-course').empty();
+                // populate drop down
+                $('#department-course').append($('<option disabled selected hidden>Open list of departments</option>'));
+                var filteredDepartments = departments.filter(item => {
+                    return item.faculty_id === facultyId;
+                });
+                filteredDepartments.forEach(department => $('#department-course').append($('<option />').val(department.department).text(department.department)));
+
+
+                $('#department-course').append($('<option />').val('Other').text('Other'));
+
+                // enable the faculty select field
+                if ($('#department-course').is(':disabled')) {
+                    $('#department-course').prop('disabled', false);
+                }
+
+            } else {
+                // Hide text / show select
+                facultyOtherOption('#faculty-text-course', '#department-course', '#department-text-course');
+            }
+
+        });
+
+        $('#department-course').change( function() {
+            if ($('#department-course').find(':selected').val() !== 'Other') {
+                departmentDefaultOption('#department-text-course');
+            } else {
+                departmentOtherOption('#department-text-course');
             }
         });
     });
 
-    function departmentDefaultOption() {
+    function departmentDefaultOption(departmentTextId) {
         // Hide text / show select
-        $('#department-text').prop( "hidden", true );
-        $('#department-text').prop( "disabled", true );
+        $(departmentTextId).prop( "hidden", true );
+        $(departmentTextId).prop( "disabled", true );
     }
 
-    function departmentOtherOption() {
+    function departmentOtherOption(departmentTextId) {
         // Hide text / show select
-        $('#department-text').prop( "hidden", false );
-        $('#department-text').prop( "disabled", false );
+        $(departmentTextId).prop( "hidden", false );
+        $(departmentTextId).prop( "disabled", false );
     }
 
-    function facultyDefaultOption() {
+    function facultyDefaultOption(facultyTextId, departmentId, departmentTextId) {
         // Hide text / show select
-        $('#faculty-text').prop( "hidden", true );
-        $('#faculty-text').prop( "disabled", true );
-        $('#department').prop( "hidden", false );
-        $('#department').prop( "disabled", false );
-        $('#department-text').prop( "hidden", true );
-        $('#department-text').prop( "disabled", true );
+        $(facultyTextId).prop( "hidden", true );
+        $(facultyTextId).prop( "disabled", true );
+        $(departmentId).prop( "hidden", false );
+        $(departmentId).prop( "disabled", false );
+        $(departmentTextId).prop( "hidden", true );
+        $(departmentTextId).prop( "disabled", true );
     }
 
-    function facultyOtherOption() {
+    function facultyOtherOption(facultyTextId, departmentId, departmentTextId) {
         // Hide text / show select
-        $('#faculty-text').prop( "hidden", false );
-        $('#faculty-text').prop( "disabled", false );
-        $('#department').prop( "disabled", true );
-        $('#department').prop( "hidden", true );
-        $('#department').text('');
-        $('#department-text').prop( "hidden", false );
-        $('#department-text').prop( "disabled", false );
+        $(facultyTextId).prop( "hidden", false );
+        $(facultyTextId).prop( "disabled", false );
+        $(departmentId).prop( "disabled", true );
+        $(departmentId).prop( "hidden", true );
+        $(departmentId).text('');
+        $(departmentTextId).prop( "hidden", false );
+        $(departmentTextId).prop( "disabled", false );
     }
 
-    function campusDefaultOption() {
+    function campusDefaultOption(campusTextId, facultyId, facultyTextId, departmentId, departmentTextId) {
         // Hide text / show select
-        $('#campus-text').prop( "hidden", true );
-        $('#campus-text').prop( "disabled", true );
-        $('#faculty').prop( "hidden", false );
-        $('#faculty').prop( "disabled", false );
-        $('#faculty-text').prop( "hidden", true );
-        $('#faculty-text').prop( "disabled", true );
-        $('#department').prop( "hidden", false );
-        $('#department').prop( "disabled", false );
-        $('#department-text').prop( "hidden", true );
-        $('#department-text').prop( "disabled", true );
+        $(campusTextId).prop( "hidden", true );
+        $(campusTextId).prop( "disabled", true );
+        $(facultyId).prop( "hidden", false );
+        $(facultyId).prop( "disabled", false );
+        $(facultyTextId).prop( "hidden", true );
+        $(facultyTextId).prop( "disabled", true );
+        $(departmentId).prop( "hidden", false );
+        $(departmentId).prop( "disabled", false );
+        $(departmentTextId).prop( "hidden", true );
+        $(departmentTextId).prop( "disabled", true );
     }
 
-    function campusOtherOption() {
+    function campusOtherOption(campusTextId, facultyId, facultyTextId, departmentId, departmentTextId) {
         // Hide text / show select
-        $('#campus-text').prop( "hidden", false );
-        $('#campus-text').prop( "disabled", false );
-        $('#faculty').prop( "disabled", true );
-        $('#faculty').prop( "hidden", true );
-        $('#faculty').text('');
-        $('#faculty-text').prop( "hidden", false );
-        $('#faculty-text').prop( "disabled", false );
-        $('#department').prop( "disabled", true );
-        $('#department').prop( "hidden", true );
-        $('#department').text('');
-        $('#department-text').prop( "hidden", false );
-        $('#department-text').prop( "disabled", false );
+        $(campusTextId).prop( "hidden", false );
+        $(campusTextId).prop( "disabled", false );
+        $(facultyId).prop( "disabled", true );
+        $(facultyId).prop( "hidden", true );
+        $(facultyId).text('');
+        $(facultyTextId).prop( "hidden", false );
+        $(facultyTextId).prop( "disabled", false );
+        $(departmentId).prop( "disabled", true );
+        $(departmentId).prop( "hidden", true );
+        $(departmentId).text('');
+        $(departmentTextId).prop( "hidden", false );
+        $(departmentTextId).prop( "disabled", false );
     }
 
     $(window).on('load', function(){
@@ -1915,18 +2053,6 @@
         $('#department-text').prop( "disabled", true );
         $('#department-text').val('');
     });
-
-    document.addEventListener("DOMContentLoaded", ()=>{
-        const currentYear = new Date().getFullYear();
-        const courseYearSelect = document.getElementById("course_year")
-
-        for (let option of courseYearSelect.options){
-            if(parseInt(option.value) === currentYear){
-                option.selected = true;
-                break;
-            }
-        }
-    })
 
 </script>
 

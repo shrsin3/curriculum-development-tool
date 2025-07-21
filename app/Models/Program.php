@@ -68,7 +68,7 @@ class Program extends Model
     {
         $directorRoleId = Role::where('role', 'program director')->first()->id;
 
-        return $this->belongsToMany(User::class, 'program_user_role', 'program_id', 'user_id')->withPivot( 'role_id')->wherePivot('role_id', $directorRoleId);
+        return $this->belongsToMany(User::class, 'program_user_role', 'program_id', 'user_id')->withPivot( 'role_id', 'has_access_to_all_courses_in_faculty', 'department_id')->wherePivot('role_id', $directorRoleId);
     }
 
     public function usersWithElevatedRoles()
